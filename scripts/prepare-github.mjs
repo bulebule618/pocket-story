@@ -4,7 +4,7 @@ import {fileURLToPath} from 'node:url';
 import {createHash} from 'node:crypto';
 const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
 // Source publication only. Never copy authors' drafts, uploads, credentials or trial data.
-const entries=['.github','api','dist','docs','migrations','scripts','server','tests','.dockerignore','.env.example','.env.vercel.example','.gitignore','.vercelignore','Dockerfile','package.json','pnpm-lock.yaml','README.md','server.mjs','start.ps1','vercel.json'];
+const entries=['.github','api','cloudflare/api.mjs','cloudflare/worker.mjs','cloudflare/wrangler.json','cloudflare/migrations','dist','docs','migrations','scripts','server','tests','.dockerignore','.env.example','.env.vercel.example','.gitignore','.vercelignore','Dockerfile','package.json','pnpm-lock.yaml','README.md','server.mjs','start.ps1','vercel.json'];
 export async function prepareGitHub(){
  const output=path.join(root,'work','github-source-'+Date.now());await mkdir(output,{recursive:true});const manifest=[];
  async function copy(relative){

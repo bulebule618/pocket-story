@@ -35,4 +35,3 @@
 已增加 scripts/prepare-github.mjs，将允许公开的应用源码复制到独立 work/github-source-* 目录并生成 SHA-256 清单，排除运行数据和环境密钥；该目录仅用于待提交源码准备，并非已上传。Actions 已补齐全新检出时测试工作目录的创建步骤。
 
 GitHub Pages 静态托管机制与免费范围参见官方文档：https://docs.github.com/en/pages/getting-started-with-github-pages/what-is-github-pages 。后端服务有独立免费额度和使用条件，不承诺无限资源或永久不中断。
-

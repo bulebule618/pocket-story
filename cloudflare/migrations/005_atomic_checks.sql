@@ -1,0 +1,1 @@
+CREATE TABLE mutation_checks(token TEXT PRIMARY KEY,ok INTEGER NOT NULL CHECK(ok=1));

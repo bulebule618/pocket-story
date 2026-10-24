@@ -1,0 +1,11 @@
+PRAGMA foreign_keys=ON;
+CREATE TABLE users(id TEXT PRIMARY KEY,email TEXT UNIQUE NOT NULL);
+CREATE TABLE challenges(id TEXT PRIMARY KEY,email TEXT NOT NULL,hash TEXT NOT NULL,expires INTEGER NOT NULL,attempts INTEGER NOT NULL DEFAULT 0,used INTEGER NOT NULL DEFAULT 0,created INTEGER NOT NULL);
+CREATE INDEX challenge_email ON challenges(email,created);
+CREATE TABLE sessions(hash TEXT PRIMARY KEY,user_id TEXT REFERENCES users(id),expires INTEGER NOT NULL);
+CREATE TABLE projects(id TEXT PRIMARY KEY,owner_id TEXT REFERENCES users(id),title TEXT NOT NULL,document TEXT NOT NULL,revision INTEGER DEFAULT 1,archived INTEGER DEFAULT 0,deleted INTEGER DEFAULT 0,public_id TEXT UNIQUE NOT NULL,live_version TEXT,online INTEGER DEFAULT 0,updated INTEGER);
+CREATE TABLE revisions(project_id TEXT REFERENCES projects(id),revision INTEGER,created INTEGER,PRIMARY KEY(project_id,revision));
+CREATE TABLE versions(id TEXT PRIMARY KEY,project_id TEXT REFERENCES projects(id),number INTEGER,document TEXT NOT NULL,created INTEGER,UNIQUE(project_id,number));
+CREATE TABLE characters(id TEXT PRIMARY KEY,owner_id TEXT REFERENCES users(id),document TEXT NOT NULL,updated INTEGER);
+CREATE TABLE assets(id TEXT PRIMARY KEY,owner_id TEXT REFERENCES users(id),name TEXT,mime TEXT,size INTEGER,original_size INTEGER,path TEXT,hidden INTEGER DEFAULT 0,created INTEGER);
+CREATE TABLE asset_refs(asset_id TEXT REFERENCES assets(id),project_id TEXT REFERENCES projects(id),version_id TEXT DEFAULT '',PRIMARY KEY(asset_id,project_id,version_id));

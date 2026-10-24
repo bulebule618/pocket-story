@@ -48,4 +48,3 @@
 可确定其公开页面由GitHub Pages服务器托管，不依赖作者电脑开机。Pages提供静态HTML/CSS/JS，公开仓库可使用GitHub Free；是否有在线账号/保存需要另行后端。此参考适合长期静态阅读链接的机制，不能把本平台的邮件、正式草稿、素材库和发布后台直接省略。
 
 官方：https://docs.github.com/en/pages/getting-started-with-github-pages/what-is-github-pages
-

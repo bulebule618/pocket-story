@@ -1,0 +1,30 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {DatabaseSync} from 'node:sqlite';
+import {readFile} from 'node:fs/promises';
+import {createD1API} from '../cloudflare/api.mjs';
+import worker from '../cloudflare/worker.mjs';
+import {seed} from '../dist/seed.js';
+async function setup(t){const raw=new DatabaseSync(':memory:');raw.exec('PRAGMA foreign_keys=ON');for(const file of ['migrations/001_initial.sql','migrations/002_request_limits.sql','migrations/003_media_access.sql','cloudflare/migrations/004_media_chunks.sql','cloudflare/migrations/005_atomic_checks.sql'])raw.exec(await readFile(new URL('../'+file,import.meta.url),'utf8'));t.after(()=>raw.close());
+ const db={prepare(sql){return {sql,args:[],bind(...args){this.args=args.map(x=>x instanceof ArrayBuffer?new Uint8Array(x):x);return this;},async first(){return raw.prepare(sql).get(...this.args)||null;},async all(){return {results:raw.prepare(sql).all(...this.args)};},async run(){const r=raw.prepare(sql).run(...this.args);return {meta:{changes:r.changes}};}};},async batch(items){raw.exec('BEGIN');try{const result=items.map(x=>x.sql.trim().startsWith('SELECT')?{results:raw.prepare(x.sql).all(...x.args)}:{meta:{changes:raw.prepare(x.sql).run(...x.args).changes}});raw.exec('COMMIT');return result;}catch(e){raw.exec('ROLLBACK');throw e;}}};return {raw,db};}
+test('Cloudflare原生D1：真实SQL事务、账号隔离、素材、修订冲突、冻结发布与下线',async t=>{
+ const {db,raw}=await setup(t),mail=[];const api=createD1API({DB:db},{mailer:async m=>mail.push(m)}),origin='https://pocket.test';
+ const call=async(route,method='GET',body,cookie='',source=origin)=>{const response=await api(new Request(origin+'/api/'+route,{method,headers:{Origin:source,...(cookie?{Cookie:cookie}:{}),...(body?{'Content-Type':Buffer.isBuffer(body)?'image/png':'application/json'}:{})},body:body?Buffer.isBuffer(body)?body:JSON.stringify(body):undefined}));return {status:response.status,data:response.headers.get('content-type')?.includes('json')?await response.json():Buffer.from(await response.arrayBuffer()),cookie:response.headers.get('set-cookie')?.split(';')[0]};};
+ const login=async email=>{const c=await call('auth/request','POST',{email});assert.equal(c.status,200);assert(!('code'in c.data));const code=mail.at(-1).code;const concurrent=await Promise.all([call('auth/verify','POST',{challengeId:c.data.challengeId,code}),call('auth/verify','POST',{challengeId:c.data.challengeId,code})]);assert.deepEqual(concurrent.map(x=>x.status).sort(),[200,401]);return concurrent.find(x=>x.status===200).cookie;};
+ const alice=await login('alice@cf.test'),bob=await login('bob@cf.test');assert.equal((await call('auth/request','POST',{email:'alice@cf.test'})).status,429);assert.equal((await call('projects')).status,401);
+ const doc=seed(),created=await call('projects','POST',{document:doc},alice);assert.equal(created.status,201);const project=created.data;assert.equal((await call('projects/'+project.id,'GET',null,bob)).status,404);
+ doc.title='Cloudflare实际SQL草稿';const saves=await Promise.all([call('projects/'+project.id,'PUT',{revision:1,document:doc},alice),call('projects/'+project.id,'PUT',{revision:1,document:doc},alice)]);assert.deepEqual(saves.map(x=>x.status).sort(),[200,409]);assert.equal(raw.prepare('SELECT COUNT(*) n FROM revisions').get().n,2);
+ const png=Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+j6WQAAAAASUVORK5CYII=','base64');const asset=await call('assets','POST',png,alice);assert.equal(asset.status,201);const file='assets/'+asset.data.id+'/file';assert.equal((await call(file)).status,404);assert.equal((await call(file,'GET',null,bob)).status,404);assert.deepEqual((await call(file,'GET',null,alice)).data,png);
+ doc.photos[0].src=asset.data.url;assert.equal((await call('projects/'+project.id,'PUT',{revision:2,document:doc},alice)).status,200);const release=await call('projects/'+project.id+'/publish','POST',{revision:3,failurePolicy:'keep'},alice);assert.equal(release.status,201);assert.deepEqual((await call(file)).data,png);assert.equal((await call('read/'+project.publicId)).data.document.title,doc.title);
+ doc.title='尚未发布修改';await call('projects/'+project.id,'PUT',{revision:3,document:doc},alice);assert.notEqual((await call('read/'+project.publicId)).data.document.title,doc.title);await call('assets/'+asset.data.id,'DELETE',{},alice);assert.deepEqual((await call(file)).data,png);
+ assert.equal((await call('projects/'+project.id+'/publish','POST',{revision:3,failurePolicy:'keep'},alice)).status,409);assert.equal((await call('read/'+project.publicId)).status,200);await call('projects/'+project.id+'/state','POST',{online:false},alice);assert.equal((await call('read/'+project.publicId)).status,404);assert.equal((await call(file)).status,404);
+ assert.equal((await call('projects','POST',{document:doc},alice,'https://evil.test')).status,403);await call('auth/logout','POST',{},alice);assert.equal((await call('projects','GET',null,alice)).status,401);assert.equal(raw.prepare('SELECT COUNT(*) n FROM mutation_checks').get().n,0);
+});
+test('Cloudflare无邮件不假装登录，免费停服开关与静态/API边界明确',async t=>{
+ const {db}=await setup(t),env={DB:db,ASSETS:{fetch:async()=>new Response('actual frontend')}};
+ const me=await worker.fetch(new Request('https://pocket.test/api/auth/me'),env);assert.deepEqual(await me.json(),{user:null,onlineReady:false});
+ const login=await worker.fetch(new Request('https://pocket.test/api/auth/request',{method:'POST',headers:{Origin:'https://pocket.test','Content-Type':'application/json'},body:JSON.stringify({email:'actual@example.test'})}),env);assert.equal(login.status,503);
+ assert.equal(await(await worker.fetch(new Request('https://pocket.test/studio'),env)).text(),'actual frontend');
+ const health=await worker.fetch(new Request('https://pocket.test/api/health'),env);assert.equal((await health.json()).freeOnly,true);assert(health.headers.get('content-security-policy').includes("frame-ancestors 'none'"));
+ assert.equal((await worker.fetch(new Request('https://pocket.test/studio'),{...env,SERVICE_ENABLED:'false'})).status,503);
+});

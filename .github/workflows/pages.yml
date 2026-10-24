@@ -1,4 +1,4 @@
-name: Publish GitHub Pages
+name: Validate and optional GitHub Pages
 on:
   push:
     branches: [main]
@@ -23,14 +23,18 @@ jobs:
         run: node -e "require('node:fs').mkdirSync('work',{recursive:true})"
       - run: node --test tests/*.test.mjs
       - name: Build only public website files
+        if: vars.PAGES_API_BASE != ''
         run: node scripts/build-pages.mjs
         env:
           PAGES_API_BASE: ${{ vars.PAGES_API_BASE }}
       - uses: actions/configure-pages@v5
+        if: vars.PAGES_API_BASE != ''
       - uses: actions/upload-pages-artifact@v4
+        if: vars.PAGES_API_BASE != ''
         with:
           path: work/pages-site
   deploy:
+    if: vars.PAGES_API_BASE != ''
     needs: build
     runs-on: ubuntu-latest
     permissions:
