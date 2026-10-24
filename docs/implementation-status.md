@@ -26,6 +26,8 @@
 
 ## GitHub Pages 最终入口增量
 
+当前完成证据：源码58文件已提交 main（cbb260172a8c296efd7eb83a32acc9bb1b7eca0f），GitHub云端Actions运行40084172303中27/27测试与语法检查通过。PAGES_API_BASE为空导致构建明确停止，deploy跳过，尚未上线。仓库写授权问题已经解决；下一步连接Vercel及数据库/存储/邮件。下面未授权/尚未提交段落均为历史追踪记录。
+
 最新授权证据：用户已安装连接器，接口确认 GitHub App 安装174768880，账号bulebule618；已恢复仓库访问授权，将重试源码提交。下方403为授权前记录。正式Pages与后端未上线。
 
 仓库创建后的实际写入验证：bulebule618/pocket-story 已可读取，账号拥有 admin/push 权限，main 初始化提交3246d2ed33fcb17f65edb8a64179ad6f578677b9。58个公开源码文件准备完成，但 GitHub 创建源码树接口返回403 Resource not accessible by integration；尚未创建提交或改动main。当前阻塞为集成未获仓库写授权，需要用户在插件/GitHub App设置中授权 pocket-story。与本机代码或测试失败无关。
@@ -35,3 +37,4 @@
 安装复查更新：GitHub 插件已安装并启用；当前会话无 GitHub 操作工具，本机 Git 无登录凭据，发布权限待接通。新增公开源码准备脚本与文件校验清单，排除工作目录和环境密钥；修复 Actions 全新检出缺少 work 测试目录的问题。Vercel 插件仍未安装。未执行公网发布。
 
 按用户选择，最终分享入口改为 GitHub Pages，默认账户/仓库 bulebule618/pocket-story，当前尚未创建。已实现仓库基础路径、hash 阅读链接、公开构建、Actions 发布、跨域服务端会话、私有素材限时授权及第三次数据库迁移。最终 27/27 自动测试通过；本机浏览器 /studio 首页实际渲染通过，云端与手机交互验收仍待完成。GitHub 账号未连接，数据库、存储和邮件未接通，因此正式上线仍受阻。配置详见 github-pages.md。
+

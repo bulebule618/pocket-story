@@ -50,6 +50,8 @@
 
 ## GitHub Pages 补充追踪
 
+当前状态：58文件源码已提交main（cbb2601），仓库授权通过。Actions 40084172303 的云端27/27测试和语法检查通过；构建缺少PAGES_API_BASE明确失败，未执行部署。正式产品URL仍未上线。以下授权失败项为历史证据。
+
 仓库创建后复查：仓库已存在，账号admin/push=true；实际创建源码树失败403 Resource not accessible by integration。源码准备58文件，尚未提交。待用户为GitHub集成授权此仓库后重试；不把账号权限当作集成写入成功。
 
 最新外部验证：已认证 bulebule618，GitHub App 安装列表为空，可访问仓库为空，pocket-story 返回404。账号身份已接通，仓库授权未接通，不能声称已发布。
@@ -64,3 +66,4 @@
 
 
 安装复查：GitHub 插件 installed=true、ENABLED；当前会话无 GitHub 工具，本机 Git 无凭据，未执行发布。源码准备脚本已生成58个允许文件和SHA-256清单，待发布副本27/27测试通过；Actions全新检出目录问题已修复。
+

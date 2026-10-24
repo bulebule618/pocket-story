@@ -22,6 +22,8 @@
 
 ## 当前验证与阻塞
 
+实际提交和云端验证结果：58个源码文件已提交到 main，提交 cbb260172a8c296efd7eb83a32acc9bb1b7eca0f，https://github.com/bulebule618/pocket-story/commit/cbb260172a8c296efd7eb83a32acc9bb1b7eca0f 。远端工作流文件已读取核对。GitHub Actions运行40084172303（https://github.com/bulebule618/pocket-story/actions/runs/40084172303）中依赖安装、语法检查和27项测试全部通过，构建因PAGES_API_BASE为空按设计停止，deploy跳过。仓库授权已经解决，当前阻塞是在线后端配置；正式公网入口尚未上线。以下403及准备重试文字保留为历史记录，以本段为当前状态。
+
 授权更新：已确认 bulebule618 的 GitHub App 安装存在（174768880），允许访问其仓库。main 仍为初始化提交3246d2ed33fcb17f65edb8a64179ad6f578677b9。本轮将重试提交58个源码文件。此前403记录属于授权前的历史，后续以实际提交结果为准。Pages尚未上线，PAGES_API_BASE及真实后端资源仍未配置。
 
 27/27 自动测试通过，包含真实本机 HTTP 跨域登录、权限、素材授权过期、仓库路径与构建防误发布。真实浏览器已确认本机 /studio 首页可打开和渲染；未完成云端浏览器验收或真实邮件收件。
@@ -33,3 +35,4 @@
 已增加 scripts/prepare-github.mjs，将允许公开的应用源码复制到独立 work/github-source-* 目录并生成 SHA-256 清单，排除运行数据和环境密钥；该目录仅用于待提交源码准备，并非已上传。Actions 已补齐全新检出时测试工作目录的创建步骤。
 
 GitHub Pages 静态托管机制与免费范围参见官方文档：https://docs.github.com/en/pages/getting-started-with-github-pages/what-is-github-pages 。后端服务有独立免费额度和使用条件，不承诺无限资源或永久不中断。
+

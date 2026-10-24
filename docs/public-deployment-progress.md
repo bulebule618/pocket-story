@@ -39,6 +39,8 @@
 
 ## GitHub Pages参考链接分析
 
+本产品当前发布进度：GitHub仓库bulebule618/pocket-story已接通并写入源码，main提交cbb260172a8c296efd7eb83a32acc9bb1b7eca0f。GitHub云端Actions40084172303已通过27项测试与语法检查，因缺少PAGES_API_BASE停止构建，部署跳过。需继续接通Vercel后端、Turso、私有Blob和Resend，不将仓库源码链接当作产品阅读链接。
+
 用户新提供：https://4vfydj7fmz-star.github.io/sdiphone/
 
 已实际请求返回HTTP200；GitHub公开仓库元数据确认 private=false、has_pages=true、default_branch=main。完整文件目录未截断，包含index.html（20,262,305字节）、preview.png、audios、videos与videos2文件夹，没有服务端代码目录。网页标题为“명재현의 iPhone”。本次HTML只下载到约916KB后超时，因此未完整审阅页面脚本，不能据此断言完全没有外部API。
@@ -46,3 +48,4 @@
 可确定其公开页面由GitHub Pages服务器托管，不依赖作者电脑开机。Pages提供静态HTML/CSS/JS，公开仓库可使用GitHub Free；是否有在线账号/保存需要另行后端。此参考适合长期静态阅读链接的机制，不能把本平台的邮件、正式草稿、素材库和发布后台直接省略。
 
 官方：https://docs.github.com/en/pages/getting-started-with-github-pages/what-is-github-pages
+
