@@ -1,0 +1,1 @@
+CREATE TABLE request_limits(key TEXT NOT NULL,bucket INTEGER NOT NULL,count INTEGER NOT NULL DEFAULT 0,PRIMARY KEY(key,bucket));

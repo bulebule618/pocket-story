@@ -1,0 +1,46 @@
+name: Publish GitHub Pages
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: github-pages
+  cancel-in-progress: false
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '24'
+      - run: npm install --global pnpm@11.25.0
+      - run: pnpm install --frozen-lockfile --ignore-scripts
+      - run: node scripts/check.mjs
+      - name: Create temporary test workspace
+        run: node -e "require('node:fs').mkdirSync('work',{recursive:true})"
+      - run: node --test tests/*.test.mjs
+      - name: Build only public website files
+        run: node scripts/build-pages.mjs
+        env:
+          PAGES_API_BASE: ${{ vars.PAGES_API_BASE }}
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v4
+        with:
+          path: work/pages-site
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Publish stable website URL
+        id: deployment
+        uses: actions/deploy-pages@v4

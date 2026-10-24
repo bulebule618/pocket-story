@@ -1,0 +1,12 @@
+work/
+node_modules/
+.env
+.env.*
+!.env.example
+.git/
+.openai/
+tests/
+outputs/
+docs/
+Dockerfile
+start.ps1

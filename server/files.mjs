@@ -1,0 +1,4 @@
+import {mkdir,writeFile,readFile} from 'node:fs/promises';
+import path from 'node:path';
+export function localFiles(directory){const root=path.join(directory,'assets');return {kind:'filesystem-local',async put(id,bytes){await mkdir(root,{recursive:true});await writeFile(path.join(root,id),bytes,{flag:'wx'});return id;},get:key=>readFile(path.join(root,key))};}
+export function blobFiles({token,put,get}){if(!token)throw Error('私有文件存储未配置');return {kind:'vercel-blob-private',async put(id,bytes,mime){const result=await put('pocket-assets/'+id,bytes,{access:'private',token,contentType:mime,addRandomSuffix:false,allowOverwrite:false});return result.pathname;},async get(key){const result=await get(key,{access:'private',token,useCache:false});if(!result||result.statusCode!==200)throw Error('素材读取失败');return Buffer.from(await new Response(result.stream).arrayBuffer());}};}
